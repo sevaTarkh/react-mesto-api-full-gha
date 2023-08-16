@@ -10,29 +10,41 @@ class Api{
         } 
         return Promise.reject(`Ошибка: ${res.status}`); 
     }
-    getUserInformationFromServer(){
+    getUserInformationFromServer(token){
       return fetch(`${this._baseUrl}/users/me`,{
-        headers: this._headers
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+      },
       })
     .then(this._getResJson)
     }
-    getInitialCards(){
+    getInitialCards(token){
         return fetch(`${this._baseUrl}/cards`,{
-            headers: this._headers
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+          },
           })
         .then(this._getResJson)
     }
-    deleteCard(cardId){
+    deleteCard(cardId, token){
         return fetch(`${this._baseUrl}${'/cards/'}${cardId}`,{
             method: 'DELETE',
-            headers: this._headers
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
           })
           .then(this._getResJson)
     }
-    createCardForServer(data){
+    createCardForServer(data, token){
       return fetch(`${this._baseUrl}/cards`,{
         method: 'POST',
-        headers: this._headers,
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify({
           name: data.fotoname,
           link: data.link
@@ -40,10 +52,13 @@ class Api{
       })
       .then(this._getResJson)
     }
-    editProfileInformation(data){
+    editProfileInformation(data, token){
     return fetch(`${this._baseUrl}/users/me`, {
       method: 'PATCH',
-      headers: this._headers,
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify({
         name: data.name,
         about: data.theme
@@ -51,27 +66,36 @@ class Api{
     })
     .then(this._getResJson)
     }
-    editProfileAvatar(data){
+    editProfileAvatar(data, token){
       return fetch(`${this._baseUrl}/users/me/avatar`, {
         method: 'PATCH',
-        headers: this._headers,
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify({
           avatar: data.linkavatar
         })
       })
       .then(this._getResJson)
     }
-    handlePutLike(cardId){
+    handlePutLike(cardId, token){
       return fetch(`${this._baseUrl}/cards/${cardId}/likes`,{
         method: 'PUT',
-        headers: this._headers
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
       })
       .then(this._getResJson)
     }
-    handleRemoveLike(cardId){
+    handleRemoveLike(cardId, token){
       return fetch(`${this._baseUrl}/cards/${cardId}/likes`,{
         method: 'DELETE',
-        headers: this._headers
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
       })
       .then(this._getResJson)
     }
@@ -79,10 +103,6 @@ class Api{
 
 const api = new Api({
     baseUrl: 'http://localhost:3000', 
-    headers: {
-      'Authorization': `Bearer ${localStorage.getItem('token')}`,
-      'Content-Type': 'application/json'
-  },
 });
 
 export default api;

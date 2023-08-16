@@ -3,10 +3,10 @@ import { CurrentUserContext } from '../contexts/CurrentUserContext.js';
 
 function Card({card, onCardClick, onCardLike, onCardDelete}){
    const currentUser = useContext(CurrentUserContext);
-   const isOwn = card.owner._id === currentUser._id;
-   const isLiked = card.likes.some(i => i._id === currentUser._id);
+   const isOwn = card.owner === currentUser.user._id;
+   const isLiked = card.likes.some((item) => item === currentUser.user._id);
    const cardLikeButtonClassName = ( 
-      `element__button-like ${isLiked && 'element_is-active'}` 
+      `element__button-like ${isLiked && 'element_is-active'}`
     );
 
    function handleLikeClick(){
@@ -34,5 +34,4 @@ function Card({card, onCardClick, onCardLike, onCardDelete}){
       </div>
     )
 }
-
 export default Card

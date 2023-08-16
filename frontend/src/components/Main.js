@@ -12,14 +12,14 @@ function Main({onEditAvatar, onEditProfile, onAddPlace, onCardClick, cards, onCa
       <main className="content">
          <section className="profile">
             <button className="profile__button-avatar" type="button" onClick={onEditAvatar}>
-               <img alt="фото портрет" src={currentUser.avatar} className="profile__avatar"/>
+               <img alt="фото портрет" src={currentUser.user.avatar} className="profile__avatar"/>
             </button>
             <div className="profile__info">
-               <h1 className="profile__title">{currentUser.name}</h1>
+               <h1 className="profile__title">{currentUser.user.name}</h1>
                <button className="profile__button profile__button-edit"  type="button" onClick={onEditProfile}>
                   <img className="profile__edit-image" alt="фото карандаша" src={edit}/>
                </button>
-               <p className="profile__subtitle">{currentUser.about}</p>
+               <p className="profile__subtitle">{currentUser.user.about}</p>
             </div>
             <button className="profile__button profile__button-add" type="button" onClick={onAddPlace}>
                <img className="profile__add-image" alt="фото плюса" src={plus}/>

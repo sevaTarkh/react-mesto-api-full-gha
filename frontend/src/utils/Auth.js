@@ -22,13 +22,12 @@ class Auth{
           })
           .then(this._getResJson)
     }
-    login(data){
+    login(email, password){
         return fetch(`${this._baseUrl}/signin`,{
             method: 'POST',
             headers: this._headers,
             body: JSON.stringify({
-                password: data.password,
-                email: data.email
+                email, password
             })
         })
         .then(this._getResJson)

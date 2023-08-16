@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import {Routes, Route, useNavigate, Navigate} from 'react-router-dom';
 import Header from './Header.js';
 import Main from './Main.js';
@@ -24,79 +24,51 @@ function App() {
    const [isInfoTooltipOpen, setIsInfoTooltipOpen] = useState(false);
    const [isRegistrateSuccess, setRegistrateSuccess] = useState(false);
    const [selectedCard, setSelectedCard] = useState(null)
-   const [currentUser, setCurrentUser] = useState({});
-   const [cards, setCards] = useState([]);
-   const [token, setToken] = useState('');
+   const [currentUser, setCurrentUser] = useState({ user: {
+      _id: '',
+      email: '',
+      name: '',
+      about: '',
+      avatar: ''}});
+   const [cardsData, setCards] = useState([]);
+   const [Usertoken, setToken] = useState('');
    const [isLoggedIn, setIsLoggedIn] = useState(false);
    const [email, setEmail] = useState('');
-   const [userData, setUserData] = useState({
-      email: '',
-      password: ''
-   })
 
    const navigate = useNavigate();
    
-   const checkToken = useCallback(() => {
-      const jwt = localStorage.getItem('jwt');
-  
-      if (jwt) {
-        checkToken(jwt)
-          .then((res) => {
-            const { _id, email } = res;
-            const userData = {
-              _id,
-              email
-            };
-            setUserData(userData);
-            navigate('/', { replace: true });
-          })
-          .catch((err) => {
-            console.log(`Ошибка в процессе проверки токена пользователя и получения личных данных: ${err}`);
-          })
-      };
-    }, [navigate]);
-  
-    useEffect(() => {
-      checkToken();
-    }, [checkToken]);
-
    useEffect(() => {
       if(isLoggedIn){
-      Promise.all([api.getUserInformationFromServer(), api.getInitialCards()])
-      .then(([data, cards]) =>{
-         setCurrentUser(data)
+      Promise.all([api.getUserInformationFromServer(Usertoken), api.getInitialCards(Usertoken)])
+      .then(([user, cards]) =>{
+         setCurrentUser(user)
          setCards(cards)
       })
       .catch((err)=>{
          console.log(err)
       })
       }
-   }, [isLoggedIn])
+   }, [isLoggedIn, Usertoken])
 
-   // useEffect(() => {
-   //    const token = localStorage.getItem("token");
-   //    setToken(token);
-   //    if (token) {
-   //       auth.checkToken(token)
-   //       .then((data) => {
-   //          if(isLoggedIn){
-   //             setUserData(data)
-   //             setEmail(data.data.email)
-   //             setIsLoggedIn(true);
-   //             navigate("/");
-   //          }
-   //       })
-   //       .catch((err) => {
-   //          console.log(err);
-   //       })  
-   //    }
-   // }, [isLoggedIn, navigate]);
+   useEffect(() => {
+      const token = localStorage.getItem('token');
+      setToken(token)
+      if (token) {
+         auth.checkToken(token)
+         .then((user) => {
+               setEmail(user.user.email)
+               setIsLoggedIn(true);
+               navigate("/");
+         })
+         .catch((err) => {
+            console.log(err);
+         })  
+      }
+   }, [isLoggedIn, navigate]);
    
    function registerUser(data) {
       auth.register(data)
-      .then((data)=>{
-         localStorage.setItem('token', data.token)
-         setToken(data.token)
+      .then(()=>{
          setRegistrateSuccess(true)
          setIsInfoTooltipOpen(true)
          navigate("/sign-in", {replace: true})
@@ -108,14 +80,13 @@ function App() {
       })
    }
    function loginUser(data) {
-      auth.login(data)
-      .then((res)=>{
+      const { email, password } = data;
+      auth.login(email, password)
+      .then((user)=>{
          setIsLoggedIn(true);
-         localStorage.setItem('token', res.token)
-         setToken(res.token)
-         setEmail(data.email)
+         localStorage.setItem('token', user.token)
+         setToken(user.token)
          navigate("/", {replace: true})
-         console.log('вы успешно вошли', email)
       })
       .catch((err)=>{
          console.log(err)
@@ -125,10 +96,6 @@ function App() {
       localStorage.removeItem("token");
       setIsLoggedIn(false);
       setToken("");
-      setUserData({
-        username: "",
-        email: "",
-      });
       navigate("/sign-in");
     };
 
@@ -154,8 +121,8 @@ function App() {
    }
 
    function handleCardLike(card) {
-      const isLiked = card.likes.some(i => i._id === currentUser._id);
-      (!isLiked ? api.handlePutLike(card._id) : api.handleRemoveLike(card._id))
+      const isLiked = card.likes.some((i) => i._id === currentUser._id);
+      (!isLiked ? api.handlePutLike(card._id, Usertoken) : api.handleRemoveLike(card._id, Usertoken))
       .then((newCard) => {
           setCards((state) => 
           state.map((c) => c._id === card._id ? newCard : c));
@@ -166,7 +133,7 @@ function App() {
    };
 
    function handleDeleteCardClick(card){
-      api.deleteCard(card._id)
+      api.deleteCard(card._id, Usertoken)
       .then(()=>{
          setCards((state) => 
          state.filter((cards) => cards._id !== card._id))
@@ -177,7 +144,7 @@ function App() {
    };
 
    function handleUpdateUser(data){
-      api.editProfileInformation(data)
+      api.editProfileInformation(data, Usertoken)
          .then((res)=>{
             setCurrentUser(res)
             closeAllPopups()
@@ -188,7 +155,7 @@ function App() {
    };
 
    function handleUpdateAvatar(data){
-      api.editProfileAvatar(data)
+      api.editProfileAvatar(data, Usertoken)
          .then((res)=>{
             setCurrentUser(res)
             closeAllPopups()
@@ -198,9 +165,9 @@ function App() {
          })
    };
    function handleAddPlaceSubmit(data){
-      api.createCardForServer(data)
+      api.createCardForServer(data, Usertoken)
          .then((newCard)=>{
-            setCards([newCard, ...cards]);
+            setCards([newCard, ...cardsData]);
             closeAllPopups()
          })
          .catch((err)=>{
@@ -215,7 +182,7 @@ function App() {
          <Header
             loggedIn={isLoggedIn}
             loggedOut={logeedOut}
-            userData={userData}
+            email={email}
          />
          <Routes>
             <Route path='/sign-up' element={<Register registerUser={registerUser}/>}/>
@@ -228,7 +195,7 @@ function App() {
                   onEditProfile={handleEditProfileClick}
                   onAddPlace={handleAddPlaceClick}
                   onCardClick={handleCardClick}
-                  cards={cards}
+                  cards={cardsData}
                   onCardLike={handleCardLike}
                   onCardDelete={handleDeleteCardClick}
                />}
