@@ -123,7 +123,7 @@ function App() {
    }
 
    function handleCardLike(card) {
-      const isLiked = card.likes.some((i) => i._id === currentUser._id);
+      const isLiked = card.likes.some((item) => item === currentUser.user._id);
       (!isLiked ? api.handlePutLike(card._id, Usertoken) : api.handleRemoveLike(card._id, Usertoken))
       .then((newCard) => {
           setCards((state) => 
