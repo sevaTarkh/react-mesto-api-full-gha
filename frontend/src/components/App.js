@@ -50,19 +50,19 @@ function App() {
       }
    }, [isLoggedIn, Usertoken])
 
+
    useEffect(() => {
       const token = localStorage.getItem('token');
       setToken(token)
-      console.log('peredau token', token)
       if (token) {
-            console.log('checktoken', auth.checkToken(token))
          auth.checkToken(token)
          .then((user) => {
-               setEmail(user.user.email)
-               setIsLoggedIn(true);
-               navigate("/");
+            setEmail(user.user.email)
+            setIsLoggedIn(true);
+            navigate("/");
          })
          .catch((err) => {
+            localStorage.removeItem('token')
             console.log(err);
          })  
       }
@@ -87,7 +87,7 @@ function App() {
       .then((user)=>{
          setIsLoggedIn(true);
          localStorage.setItem('token', user.token)
-         setToken(user.token)
+         setToken(user.token);
          navigate("/", {replace: true})
       })
       .catch((err)=>{
@@ -97,8 +97,8 @@ function App() {
    const logeedOut = () => {
       localStorage.removeItem("token");
       setIsLoggedIn(false);
-      setToken("");
       navigate("/sign-in");
+      setToken('');
     };
 
    function handleEditAvatarClick () {
