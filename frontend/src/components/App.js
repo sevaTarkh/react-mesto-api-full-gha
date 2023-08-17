@@ -53,7 +53,9 @@ function App() {
    useEffect(() => {
       const token = localStorage.getItem('token');
       setToken(token)
+      console.log('peredau token', token)
       if (token) {
+            console.log('checktoken', auth.checkToken(token))
          auth.checkToken(token)
          .then((user) => {
                setEmail(user.user.email)
